@@ -1,1 +1,1 @@
-# smallest-enclosing-circle
+# Smallest Enclosing Circle
