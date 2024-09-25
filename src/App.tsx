@@ -1,13 +1,15 @@
-import { ReactNode } from "react";
+import { useState, useEffect, useRef } from "react";
+import { ReactNode, RefObject } from "react";
 
 
 
 const App = ():ReactNode => {
+	const canvasRef: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
+
 	return (
 		<>
-		<h1>The quick brown fox jumps over the lazy dog</h1>
 		<div className = 'p-2 rounded-xl flex justify-center'>
-			<canvas className = "w-5/6" style = {{imageRendering: "pixelated"}}/>
+			<canvas ref = {canvasRef} className = "w-5/6" style = {{imageRendering: "pixelated"}}/>
 		</div>
 		</>
 	);
