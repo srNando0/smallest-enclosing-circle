@@ -54,14 +54,14 @@ export class Vector2D {
 	}
 
 	/*public static min(u: Vector2D, v: Vector2D): Vector2D {
-		let minX = (u.x < v.x) ? u.x : v.x;
-		let minY = (u.y < v.y) ? u.y : v.y;
+		const minX = (u.x < v.x) ? u.x : v.x;
+		const minY = (u.y < v.y) ? u.y : v.y;
 		return new Vector2D(minX, minY);
 	}
 
 	public static max(u: Vector2D, v: Vector2D): Vector2D {
-		let maxX = (u.x > v.x) ? u.x : v.x;
-		let maxY = (u.y > v.y) ? u.y : v.y;
+		const maxX = (u.x > v.x) ? u.x : v.x;
+		const maxY = (u.y > v.y) ? u.y : v.y;
 		return new Vector2D(maxX, maxY);
 	}*/
 }
