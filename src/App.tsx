@@ -20,7 +20,7 @@ interface RadiusInfo {
 /*
 	Auxiliary Functions
 */
-function generateRandomPoint(
+/*function generateRandomPointSquare(
 	min: Vector2,
 	max: Vector2,
 ): Point {
@@ -30,6 +30,22 @@ function generateRandomPoint(
 		(1 - rand.x)*min.x + rand.x*max.x,
 		(1 - rand.y)*min.y + rand.y*max.y,
 	));
+}*/
+
+function generateRandomPointNormal(
+	center: Point,
+	std: number,
+): Point {
+	const rand: Vector2 = Vector2.random();
+
+	// Box–Muller transform
+	const phi: number = 2*Math.PI*rand.x;
+	const r: number = std*Math.sqrt(-2*Math.log(rand.y));
+
+	return Point.add(
+		center,
+		new Vector2(r*Math.cos(phi), r*Math.sin(phi))
+	);
 }
 
 
@@ -39,21 +55,21 @@ function generateRandomPoint(
 */
 function generatePointsAndCircle(
 	renderer: Renderer,
-	resolution: Resolution
+	resolution: Resolution,
+	numberOfPoints: number
 ): RadiusInfo {
 	const points: Point[] = [];
 
 	// Generate points
-	const center: Vector2 = new Vector2(resolution.width/2, resolution.height/2);
+	const center: Point = new Point(new Vector2(resolution.width/2, resolution.height/2));
 	const maxResolution: number = (resolution.height < resolution.width) ? resolution.height : resolution.width;
-	const min: Vector2 = Vector2.sub(center, new Vector2(maxResolution/4, maxResolution/4));
-	const max: Vector2 = Vector2.add(center, new Vector2(maxResolution/4, maxResolution/4));
+	//const min: Vector2 = Vector2.sub(center, new Vector2(maxResolution/4, maxResolution/4));
+	//const max: Vector2 = Vector2.add(center, new Vector2(maxResolution/4, maxResolution/4));
 
-	const numOfPoints: number = 1000;
-	for (let i = 0; i < numOfPoints; i++) {
-		const point: Point = generateRandomPoint(
-			min,
-			max
+	for (let i = 0; i < numberOfPoints; i++) {
+		const point: Point = generateRandomPointNormal(
+			center,
+			maxResolution/8
 		);
 
 		points.push(point);
@@ -115,8 +131,6 @@ const App = ():ReactNode => {
 	/*
 		Variables
 	*/
-	const canvasRef: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
-	const renderer = useRef<Renderer | null>(null);
 	const canvasResolution: Resolution = {
 		width: 10*192,
 		height: 10*108
@@ -131,7 +145,7 @@ const App = ():ReactNode => {
 		if (renderer.current == null)
 			throw new NullError("renderer is null");
 
-		setRadiusInfo(generatePointsAndCircle(renderer.current, canvasResolution));
+		setRadiusInfo(generatePointsAndCircle(renderer.current, canvasResolution, numberOfPoints));
 	}
 
 
@@ -139,10 +153,14 @@ const App = ():ReactNode => {
 	/*
 		Hooks
 	*/
+	const canvasRef: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
+	const renderer = useRef<Renderer | null>(null);
+
 	const [radiusInfo, setRadiusInfo] = useState<{heuristic: number, smallest: number}>({
 		heuristic: 0,
 		smallest: 0
 	});
+	const [numberOfPoints, setNumberOfPoints] = useState<number>(100);
 
 	useEffect(() => {
 		// Exit if the canvas is not loaded yet
@@ -158,7 +176,7 @@ const App = ():ReactNode => {
 		try {
 			renderer.current = new Renderer(current, canvasResolution);
 
-			setRadiusInfo(generatePointsAndCircle(renderer.current, canvasResolution));
+			setRadiusInfo(generatePointsAndCircle(renderer.current, canvasResolution, numberOfPoints));
 		} catch (e: unknown) {
 			if (e instanceof Error) {
 				console.error(e.name);
@@ -176,8 +194,30 @@ const App = ():ReactNode => {
 				<h1 className="self-center text-blue-600">Heuristic: {radiusInfo.heuristic}</h1>
 				<h1 className="self-center text-yellow-500">Smallest: {radiusInfo.smallest}</h1>
 			</div>
-			<canvas ref={canvasRef} className="w-5/6 self-center bg-black rounded-xl" style = {{imageRendering: "crisp-edges"}}/>
+			<canvas ref={canvasRef} className="w-3/4 self-center bg-black rounded-xl" style={{imageRendering: "crisp-edges"}}/>
 			<button className="p-2 w-1/2 self-center bg-lime-600 rounded-2xl" onClick={clickGenerate}>Generate points!</button>
+			<div className="flex justify-center">
+				<input
+					className="w-1/4"
+					type="range"
+					min="2"
+					max="1000"
+					value={numberOfPoints}
+					onChange={(e) => setNumberOfPoints(Number(e.target.value))}
+				/>
+				<input
+					className="m-2 p-1 w-14 text-center
+					bg-gray-500 border-0 rounded-2xl
+					focus:outline-none focus:ring-lime-600 focus:border-lime-600 focus:ring-2
+					[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+					style={{WebkitAppearance: "none"}}
+					type="number"
+					min="2"
+					max="1000"
+					value={numberOfPoints}
+					onChange={(e) => setNumberOfPoints(Number(e.target.value))}
+				/>
+			</div>
 		</div>
 		</>
 	);
