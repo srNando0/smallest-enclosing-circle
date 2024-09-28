@@ -15,6 +15,21 @@ interface RadiusInfo {
 	smallest: number
 }
 
+interface TestInfo {
+	generatePoints: {
+		numberOfPoints: number,
+		time: number
+	},
+	heuristic: {
+		time: number,
+		radius: number
+	},
+	smallest: {
+		time: number,
+		radius: number
+	}
+}
+
 
 
 /*
@@ -94,32 +109,79 @@ function generatePointsAndCircle(
 		heuristic: enclosingCircle.radius,
 		smallest: sec.radius
 	};
+}
 
 
 
-	// Test
-	/*const pointsTest: Point[] = [];
-	for (let i = 0; i < 3; i++) {
-		const point: Point = generateRandomPoint(
-			min,
-			max
+function testAlgorithms(numberOfPoints: number): TestInfo {
+	const points: Point[] = [];
+
+	let timestampStart: DOMHighResTimeStamp;
+	let timestampFinish: DOMHighResTimeStamp;
+
+	let testInfo: TestInfo = {
+		generatePoints: {
+			numberOfPoints: 0,
+			time: 0
+		},
+		heuristic: {
+			time: 0,
+			radius: 0
+		},
+		smallest: {
+			time: 0,
+			radius: 0
+		}
+	};
+
+
+
+	// Generate points
+	const center: Point = new Point(Vector2.zero());
+	
+	timestampStart = performance.now();
+	for (let i = 0; i < numberOfPoints; i++) {
+		const point: Point = generateRandomPointNormal(
+			center,
+			1
 		);
 
-		pointsTest.push(point);
+		points.push(point);
 	}
-	renderer.clear();
-	renderer.drawPoints(pointsTest, "white", 4);
-	const circleTest = Circle.circleWith3Points(pointsTest);
-	renderer.drawCircle(circleTest, "red", 2);
+	timestampFinish = performance.now();
 
-	const A: Matrix2 = new Matrix2([
-		[5, -4],
-		[3, 7]
-	])
-	const b: Vector2 = new Vector2(9, 2);
-	const x: Vector2 = Vector2.matmul(A.inverse(), b);
-	console.log(A.inverse().a);
-	console.log(`x: ${x.x}, y: ${x.y}`);*/
+	testInfo.generatePoints = {
+		numberOfPoints: numberOfPoints,
+		time: timestampFinish - timestampStart
+	};
+
+
+
+	// Generate an enclosing circle
+	timestampStart = performance.now();
+	const enclosingCircle: Circle = Circle.heuristicEnclosingCircle(points);
+	timestampFinish = performance.now();
+
+	testInfo.heuristic = {
+		time: timestampFinish - timestampStart,
+		radius: enclosingCircle.radius
+	};
+
+
+
+	// Generate the smallest enclosing circle
+	timestampStart = performance.now();
+	const sec: Circle = Circle.smallestEnclosingCircle(points);
+	timestampFinish = performance.now();
+
+	testInfo.smallest = {
+		time: timestampFinish - timestampStart,
+		radius: enclosingCircle.radius
+	};
+
+
+
+	return testInfo;
 }
 
 
@@ -146,6 +208,39 @@ const App = ():ReactNode => {
 			throw new NullError("renderer is null");
 
 		setRadiusInfo(generatePointsAndCircle(renderer.current, canvasResolution, numberOfPoints));
+	}
+
+	const clickTest = (): void => {
+		const numberOfTests = 100;
+		const numberOfSamples = 100;
+		const numbersOfPoints: number[] = [];
+		const heuristics: number[] = [];
+		const smallests: number[] = [];
+
+		for (let i = 1; i <= numberOfTests; i++) {
+			const numberOfPoints: number = (1000/numberOfTests)*i;
+			numbersOfPoints.push(numberOfPoints);
+
+			let heristic: number = 0;
+			let smallest: number = 0;
+			for (let j = 0; j < numberOfSamples; j++) {
+				const testInfo: TestInfo = testAlgorithms(numberOfPoints);
+
+				heristic += testInfo.heuristic.time;
+				smallest += testInfo.smallest.time;
+			}
+			heristic /= numberOfSamples;
+			smallest /= numberOfSamples;
+
+			heuristics.push(heristic);
+			smallests.push(smallest);
+
+			console.log(`points: ${numberOfPoints}, heuristic: ${heristic}, smallest: ${smallest}`);
+		}
+
+		console.log(numbersOfPoints);
+		console.log(heuristics);
+		console.log(smallests);
 	}
 
 
@@ -189,13 +284,24 @@ const App = ():ReactNode => {
 
 	return (
 		<>
-		<div className='p-2 rounded-xl flex flex-col text-xl'>
-			<div className="flex justify-evenly">
-				<h1 className="self-center text-blue-600">Heuristic: {radiusInfo.heuristic}</h1>
-				<h1 className="self-center text-yellow-500">Smallest: {radiusInfo.smallest}</h1>
+		<div className='p-2 rounded-xl flex flex-col text-center text-xl'>
+			<div className="flex flex-1 justify-center items-center">
+				<h1 className="flex-1 text-blue-600">Heuristic: {radiusInfo.heuristic}</h1>
+				<button
+					className="p-2 text-base border-2 border-slate-700 rounded-2xl"
+					onClick={clickTest}
+				>
+					Do test
+				</button>
+				<h1 className="flex-1 text-yellow-500">Smallest: {radiusInfo.smallest}</h1>
 			</div>
 			<canvas ref={canvasRef} className="w-3/4 self-center bg-black rounded-xl" style={{imageRendering: "crisp-edges"}}/>
-			<button className="p-2 w-1/2 self-center bg-lime-600 rounded-2xl" onClick={clickGenerate}>Generate points!</button>
+			<button
+				className="p-2 w-1/2 self-center bg-lime-600 rounded-2xl"
+				onClick={clickGenerate}
+			>
+				Generate points!
+			</button>
 			<div className="flex justify-center">
 				<input
 					className="w-1/4"
@@ -206,7 +312,7 @@ const App = ():ReactNode => {
 					onChange={(e) => setNumberOfPoints(Number(e.target.value))}
 				/>
 				<input
-					className="m-2 p-1 w-14 text-center
+					className="m-2 p-1 w-14
 					bg-gray-500 border-0 rounded-2xl
 					focus:outline-none focus:ring-lime-600 focus:border-lime-600 focus:ring-2
 					[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
