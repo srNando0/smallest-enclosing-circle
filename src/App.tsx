@@ -176,7 +176,7 @@ function testAlgorithms(numberOfPoints: number): TestInfo {
 
 	testInfo.smallest = {
 		time: timestampFinish - timestampStart,
-		radius: enclosingCircle.radius
+		radius: sec.radius
 	};
 
 
