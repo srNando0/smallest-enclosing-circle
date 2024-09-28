@@ -190,16 +190,20 @@ export class Circle {
 
 
 		// Recursion
-		const P_: Point[] = [...P];
+		let C: Circle;
 
-		const p: Point = P_.pop()!;
-		const D: Circle = Circle.welzl(P_, R);
+		const p: Point = P.pop()!;	// P \ {p}
+		C = Circle.welzl(P, R);		// C(P \ {p}, R)
+		P.push(p);					// P
 
-		if (D.isPointInside(p))
-			return D;
+		if (C.isPointInside(p))
+			return C;				// C(P, R) = C(P \ {p}, R)
 
-		const R_: Point[] = [...R, p];
-		return Circle.welzl(P_, R_);
+		R.push(p);					// R U {p}
+		C = Circle.welzl(P, R);		// C(P, R U {p})
+		R.pop();					// R
+		
+		return C;					// C(P, R) = C(P, R U {p})
 	}
 
 
