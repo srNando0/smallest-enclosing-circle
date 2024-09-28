@@ -3,7 +3,7 @@ import { ReactNode, RefObject } from "react";
 
 import { Resolution, NullError, Renderer } from "./core/Renderer";
 import { Point, Circle } from "./core/Geometry";
-import { Vector2D } from "./core/LinearAlgebra";
+import { Matrix2, Vector2 } from "./core/LinearAlgebra";
 
 
 
@@ -11,12 +11,12 @@ import { Vector2D } from "./core/LinearAlgebra";
 	Auxiliary Functions
 */
 function generateRandomPoint(
-	min: Vector2D,
-	max: Vector2D,
+	min: Vector2,
+	max: Vector2,
 ): Point {
-	const rand: Vector2D = Vector2D.random();
+	const rand: Vector2 = Vector2.random();
 
-	return new Point(new Vector2D(
+	return new Point(new Vector2(
 		(1 - rand.x)*min.x + rand.x*max.x,
 		(1 - rand.y)*min.y + rand.y*max.y,
 	));
@@ -34,12 +34,12 @@ function generatePointsAndCircle(
 	const points: Point[] = [];
 
 	// Generate points
-	const center: Vector2D = new Vector2D(resolution.width/2, resolution.height/2);
-	const maxResolution = (resolution.height < resolution.width) ? resolution.height : resolution.width;
-	const min: Vector2D = Vector2D.sub(center, new Vector2D(maxResolution/4, maxResolution/4));
-	const max: Vector2D = Vector2D.add(center, new Vector2D(maxResolution/4, maxResolution/4));
+	const center: Vector2 = new Vector2(resolution.width/2, resolution.height/2);
+	const maxResolution: number = (resolution.height < resolution.width) ? resolution.height : resolution.width;
+	const min: Vector2 = Vector2.sub(center, new Vector2(maxResolution/4, maxResolution/4));
+	const max: Vector2 = Vector2.add(center, new Vector2(maxResolution/4, maxResolution/4));
 
-	const numOfPoints: number = 100;
+	const numOfPoints: number = 1000;
 	for (let i = 0; i < numOfPoints; i++) {
 		const point: Point = generateRandomPoint(
 			min,
@@ -51,12 +51,42 @@ function generatePointsAndCircle(
 
 	renderer.clear();
 
+	// Generate an enclosing circle
+	const enclosingCircle: Circle = Circle.heuristicEnclosingCircle(points);
+	renderer.drawCircle(enclosingCircle, "blue", 2);
+
+	// Generate the smallest enclosing circle
+	const sec: Circle = Circle.smallestEnclosingCircle(points);
+	renderer.drawCircle(sec, "yellow", 2);
+
 	// Draw points
 	renderer.drawPoints(points, "white", 4);
 
-	// Generate an enclosing circles
-	const enclosingCircle = Circle.heuristicEnclosingCircle(points);
-	renderer.drawCircle(enclosingCircle, "red", 2);
+
+
+	// Test
+	/*const pointsTest: Point[] = [];
+	for (let i = 0; i < 3; i++) {
+		const point: Point = generateRandomPoint(
+			min,
+			max
+		);
+
+		pointsTest.push(point);
+	}
+	renderer.clear();
+	renderer.drawPoints(pointsTest, "white", 4);
+	const circleTest = Circle.circleWith3Points(pointsTest);
+	renderer.drawCircle(circleTest, "red", 2);
+
+	const A: Matrix2 = new Matrix2([
+		[5, -4],
+		[3, 7]
+	])
+	const b: Vector2 = new Vector2(9, 2);
+	const x: Vector2 = Vector2.matmul(A.inverse(), b);
+	console.log(A.inverse().a);
+	console.log(`x: ${x.x}, y: ${x.y}`);*/
 }
 
 
@@ -77,7 +107,7 @@ const App = ():ReactNode => {
 
 	const clickGenerate = (): void => {
 		if (renderer == null)
-			throw new NullError("pathTracer is null");
+			throw new NullError("renderer is null");
 
 		generatePointsAndCircle(renderer, canvasResolution);
 	}
