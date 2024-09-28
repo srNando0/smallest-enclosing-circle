@@ -153,9 +153,6 @@ export class Circle {
 		const distanceX: number = Point.distance(minXPoint, maxXPoint);
 		const distanceY: number = Point.distance(minYPoint, maxYPoint);
 
-		let centerX: Point = Point.lerp(0.5, minXPoint, maxXPoint);
-		let centerY: Point = Point.lerp(0.5, minYPoint, maxYPoint);
-
 		// Setting a initial center point and radius
 		let circle: Circle;
 

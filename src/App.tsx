@@ -3,7 +3,7 @@ import { ReactNode, RefObject } from "react";
 
 import { Resolution, NullError, Renderer } from "./core/Renderer";
 import { Point, Circle } from "./core/Geometry";
-import { Matrix2, Vector2 } from "./core/LinearAlgebra";
+import { Vector2 } from "./core/LinearAlgebra";
 
 
 
