@@ -8,6 +8,16 @@ import { Matrix2, Vector2 } from "./core/LinearAlgebra";
 
 
 /*
+	Interfaces
+*/
+interface RadiusInfo {
+	heuristic: number,
+	smallest: number
+}
+
+
+
+/*
 	Auxiliary Functions
 */
 function generateRandomPoint(
@@ -30,7 +40,7 @@ function generateRandomPoint(
 function generatePointsAndCircle(
 	renderer: Renderer,
 	resolution: Resolution
-) {
+): RadiusInfo {
 	const points: Point[] = [];
 
 	// Generate points
@@ -61,6 +71,13 @@ function generatePointsAndCircle(
 
 	// Draw points
 	renderer.drawPoints(points, "white", 4);
+
+
+
+	return {
+		heuristic: enclosingCircle.radius,
+		smallest: sec.radius
+	};
 
 
 
@@ -95,24 +112,37 @@ function generatePointsAndCircle(
 	Main ReactNode
 */
 const App = ():ReactNode => {
+	/*
+		Variables
+	*/
 	const canvasRef: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
+	const renderer = useRef<Renderer | null>(null);
 	const canvasResolution: Resolution = {
 		width: 10*192,
 		height: 10*108
 	};
 
-	let renderer: Renderer | null;
 
 
-
+	/*
+		Functions
+	*/
 	const clickGenerate = (): void => {
-		if (renderer == null)
+		if (renderer.current == null)
 			throw new NullError("renderer is null");
 
-		generatePointsAndCircle(renderer, canvasResolution);
+		setRadiusInfo(generatePointsAndCircle(renderer.current, canvasResolution));
 	}
 
 
+
+	/*
+		Hooks
+	*/
+	const [radiusInfo, setRadiusInfo] = useState<{heuristic: number, smallest: number}>({
+		heuristic: 0,
+		smallest: 0
+	});
 
 	useEffect(() => {
 		// Exit if the canvas is not loaded yet
@@ -126,9 +156,9 @@ const App = ():ReactNode => {
 
 		// Create a Renderer and call the main function
 		try {
-			renderer = new Renderer(current, canvasResolution);
+			renderer.current = new Renderer(current, canvasResolution);
 
-			generatePointsAndCircle(renderer, canvasResolution);
+			setRadiusInfo(generatePointsAndCircle(renderer.current, canvasResolution));
 		} catch (e: unknown) {
 			if (e instanceof Error) {
 				console.error(e.name);
@@ -141,7 +171,11 @@ const App = ():ReactNode => {
 
 	return (
 		<>
-		<div className='p-2 rounded-xl flex flex-col'>
+		<div className='p-2 rounded-xl flex flex-col text-xl'>
+			<div className="flex justify-evenly">
+				<h1 className="self-center text-blue-600">Heuristic: {radiusInfo.heuristic}</h1>
+				<h1 className="self-center text-yellow-500">Smallest: {radiusInfo.smallest}</h1>
+			</div>
 			<canvas ref={canvasRef} className="w-5/6 self-center bg-black rounded-xl" style = {{imageRendering: "crisp-edges"}}/>
 			<button className="p-2 w-1/2 self-center bg-lime-600 rounded-2xl" onClick={clickGenerate}>Generate points!</button>
 		</div>
