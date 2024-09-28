@@ -23,11 +23,11 @@ export class Point {
 	}
 
 	public static distance(p1: Point, p2: Point): number {
-		return Vector2.sub(p1.pos, p2.pos).length();
+		return Vector2.sub(p1.pos, p2.pos).norm();
 	}
 
 	public static sqrDistance(p1: Point, p2: Point): number {
-		return Vector2.sub(p1.pos, p2.pos).sqrLength();
+		return Vector2.sub(p1.pos, p2.pos).sqrNorm();
 	}
 
 	public static lerp(lambda: number, p1: Point, p2: Point): Point {
@@ -96,27 +96,24 @@ export class Circle {
 		if (points.length != 3)
 			throw new Error("Number of points different than 2 in Circle.circleWith2Points");
 
-		const p1_p0: Vector2 = Point.sub(points[1], points[0]);
-		const p2_p0: Vector2 = Point.sub(points[2], points[0]);
+		const r1: Vector2 = Point.sub(points[1], points[0]);
+		const r2: Vector2 = Point.sub(points[2], points[0]);
 
-		const A: Matrix2 = new Matrix2([
-			[2*p1_p0.x, 2*p1_p0.y],
-			[2*p2_p0.x, 2*p2_p0.y]
+		const _2Rt: Matrix2 = new Matrix2([
+			[2*r1.x, 2*r1.y],
+			[2*r2.x, 2*r2.y]
 		]);
-		const b: Vector2 = new Vector2(
-			Vector2.dot(p1_p0, p1_p0),
-			Vector2.dot(p2_p0, p2_p0)
+		const s: Vector2 = new Vector2(
+			Vector2.dot(r1, r1),
+			Vector2.dot(r2, r2)
 		);
+		const c: Vector2 = Vector2.matmul(_2Rt.inverse(), s);
 
 		const center: Point = Point.add(
 			points[0],
-			Vector2.matmul(A.inverse(), b)
+			c
 		);
-		const radius: number = Math.max(
-			Point.distance(center, points[0]),
-			Point.distance(center, points[1]),
-			Point.distance(center, points[2])
-		)
+		const radius: number = c.norm();
 
 		return new Circle(center, radius);
 	}

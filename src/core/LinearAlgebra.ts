@@ -16,11 +16,11 @@ export class Vector2 {
 		return new Vector2(this.x, this.y);
 	}
 
-	public length(): number {
-		return Math.sqrt(this.sqrLength());
+	public norm(): number {
+		return Math.sqrt(this.sqrNorm());
 	}
 
-	public sqrLength(): number {
+	public sqrNorm(): number {
 		return Vector2.dot(this, this);
 	}
 

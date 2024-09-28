@@ -98,7 +98,7 @@ function generatePointsAndCircle(
 
 	// Generate the smallest enclosing circle
 	const sec: Circle = Circle.smallestEnclosingCircle(points);
-	renderer.drawCircle(sec, "yellow", 2);
+	renderer.drawCircle(sec, "#FFBC00", 2);
 
 	// Draw points
 	renderer.drawPoints(points, "white", 4);
@@ -212,7 +212,7 @@ const App = ():ReactNode => {
 
 	const clickTest = (): void => {
 		const numberOfTests = 100;
-		const numberOfSamples = 100;
+		const numberOfSamples = 1000;
 		const numbersOfPoints: number[] = [];
 		const heuristics: number[] = [];
 		const smallests: number[] = [];
