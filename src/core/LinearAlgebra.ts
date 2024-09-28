@@ -33,6 +33,10 @@ export class Vector2D {
 		return new Vector2D(0, 0);
 	}
 
+	public static random(): Vector2D {
+		return new Vector2D(Math.random(), Math.random());
+	}
+
 	public static add(u: Vector2D, v: Vector2D): Vector2D {
 		return new Vector2D(u.x + v.x, u.y + v.y);
 	}
@@ -51,6 +55,13 @@ export class Vector2D {
 
 	public static dot(u: Vector2D, v: Vector2D): number {
 		return u.x*v.x + u.y*v.y;
+	}
+
+	public static lerp(lambda: number, u: Vector2D, v: Vector2D): Vector2D {
+		return Vector2D.add(
+			Vector2D.mul((1 - lambda), u),
+			Vector2D.mul(lambda, v)
+		);
 	}
 
 	/*public static min(u: Vector2D, v: Vector2D): Vector2D {
