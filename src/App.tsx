@@ -211,7 +211,7 @@ const App = ():ReactNode => {
 	}
 
 	const clickTest = (): void => {
-		const numberOfTests = 100;
+		const numberOfTests = 1000;
 		const numberOfSamples = 1000;
 		const numbersOfPoints: number[] = [];
 		const heuristics: number[] = [];
